@@ -1,4 +1,4 @@
-require 'set'
+require 'set'~
 
 class WordChain
     ALPHABET = Set.new("a".."z")
