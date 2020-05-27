@@ -1,60 +1,67 @@
-require 'set'~
+require 'set'
 
 class WordChain
-    ALPHABET = Set.new("a".."z")
-
-    attr_accessor :start_word, :end_word
 
     def initialize
-        @start_word = start_word
-        @end_word = end_word
-        @dictionary = Set.new(@words)
+        @start_word = ""
+        @end_word = ""
         @words = File.readlines("dictionary.txt").map(&:chomp)
+        @dictionary = Set.new(@words)
+        @possible_words = []
     end
 
     def get_words
         print "Please enter your starting word: "
-        start_word = gets.chomp
-        while !valid_word?(start_word)
+        @start_word = gets.chomp
+        while !valid_word?(@start_word)
             print "Please enter your starting word: "
-            start_word = gets.chomp
+            @start_word = gets.chomp
         end
-        puts start_word + " is your starting word."
+        puts @start_word + " is your starting word."
 
-        print "Please enter your ending word: "
-        end_word = gets.chomp
-        while !valid_word?(end_word)
+        print "Please enter an ending word of the same length: "
+        @end_word = gets.chomp
+        while !valid_word?(@end_word)
             print "Please enter your ending word: "
-            end_word = gets.chomp
+            @end_word = gets.chomp
         end
-        puts end_word + " is your ending word."
-
-        print adjacent_words(start_word)
+        puts @end_word + " is your ending word."
+        limit_dictionary(@start_word)
+        @possible_words << @start_word
+        change_letter(@start_word,@end_word)
     end
 
     def valid_word?(word)
-        if @words.include?(word)
+        if @dictionary.include?(word)
             return true
         else
-            puts "This is not a valid word."
             return false
         end
     end
 
-    def adjacent_words(word)
-        possible_words = []
-        working_word = word
-        alpha_array = ALPHABET.to_a
+    def limit_dictionary(word)
+        length = word.length
+        @dictionary.select! {|word| word.length == length}
+    end
 
-        word.each_char do |char|
-            alpha_array.each do |letter|
-                working_word[char] = letter
-                if valid_word?(working_word)
-                   possible_words << working_word
+    def change_letter(start,ending)
+        working_word = start.dup
+
+        while working_word != ending
+            working_word.each_char.with_index do |char,ind|
+                if working_word[ind] == ending[ind]
+                    next
+                else
+                    working_word[ind] = ending[ind]
+                    if valid_word?(working_word)
+                        @possible_words << working_word
+                    else
+                        working_word[ind] = start[ind]
+                    end
                 end
             end
         end
-        possible_words
+        p @possible_words
     end
 end
 
